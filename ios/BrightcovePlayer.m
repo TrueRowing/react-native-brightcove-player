@@ -141,29 +141,29 @@ BOOL _resizeAspectFill;
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didPassCuePoints:(NSDictionary *)cuePointInfo{
-      
+    
     BCOVCuePointCollection *collection = cuePointInfo[kBCOVPlaybackSessionEventKeyCuePoints];
     
     for(BCOVCuePoint *point in collection){
         if (self.onCuePoint) {
             self.onCuePoint(@{
-                                 @"type": [point type],
-                                 @"id" :[point.properties valueForKey:@"id"] ? [point.properties valueForKey:@"id"] : nil,
-                                 @"position" : @(CMTimeGetSeconds([point position])),
-                                 @"name" : [point.properties valueForKey:@"name"] ? [point.properties valueForKey:@"name"] : nil,
-                                 @"metadata" : [point.properties valueForKey:@"metadata"] ? [point.properties valueForKey:@"metadata"] : nil,
-                                 @"forceStop" : [point.properties valueForKey:@"force_stop"] ? [point.properties valueForKey:@"force_stop"] : nil,
-                                 });
+                              @"type": [point type],
+                              @"id" :[point.properties valueForKey:@"id"] ? [point.properties valueForKey:@"id"] : nil,
+                              @"position" : @(CMTimeGetSeconds([point position])),
+                              @"name" : [point.properties valueForKey:@"name"] ? [point.properties valueForKey:@"name"] : nil,
+                              @"metadata" : [point.properties valueForKey:@"metadata"] ? [point.properties valueForKey:@"metadata"] : nil,
+                              @"forceStop" : [point.properties valueForKey:@"force_stop"] ? [point.properties valueForKey:@"force_stop"] : nil,
+                              });
         }
     }
 }
 
 - (void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didReceiveLifecycleEvent:(BCOVPlaybackSessionLifecycleEvent *)lifecycleEvent {
-
+    
     if(_resizeAspectFill) {
         session.playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     }
-
+    
     if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventReady) {
         if (self.onReady) {
             self.onReady(@{});
@@ -208,7 +208,7 @@ BOOL _resizeAspectFill;
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFail) {
         if (self.onStatusEvent) {
             
-             NSString* error = nil;
+            NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
@@ -220,7 +220,7 @@ BOOL _resizeAspectFill;
         }
     } else if (lifecycleEvent.eventType == kBCOVPlaybackSessionLifecycleEventFailedToPlayToEndTime) {
         if (self.onStatusEvent) {
-             NSString* error = nil;
+            NSString* error = nil;
             if ([lifecycleEvent.properties  valueForKey:kBCOVPlaybackSessionEventKeyError] != nil ) {
                 error = [NSString stringWithFormat:@"`%@`",  lifecycleEvent.properties[kBCOVPlaybackSessionEventKeyError]];
             }
@@ -288,7 +288,7 @@ BOOL _resizeAspectFill;
             
             self.onStatusEvent(@{
                                  @"type": @("error"),
-                                  @"error": error ? error : [NSNull null]
+                                 @"error": error ? error : [NSNull null]
                                  });
         }
     }
@@ -303,7 +303,7 @@ BOOL _resizeAspectFill;
 }
 
 -(void)playbackController:(id<BCOVPlaybackController>)controller playbackSession:(id<BCOVPlaybackSession>)session didProgressTo:(NSTimeInterval)progress {
-   
+    
     if (self.onProgress && progress > 0 && progress != INFINITY) {
         self.onProgress(@{
                           @"currentTime": @(progress)
@@ -313,8 +313,8 @@ BOOL _resizeAspectFill;
     if (_lastBufferProgress != bufferProgress) {
         _lastBufferProgress = bufferProgress;
         self.onUpdateBufferProgress(@{
-                          @"bufferProgress": @(bufferProgress),
-                          });
+                                      @"bufferProgress": @(bufferProgress),
+                                      });
     }
 }
 
@@ -338,21 +338,14 @@ BOOL _resizeAspectFill;
         
         for (AVMetadataItem* metadata in playerItem.timedMetadata)
         {
-            
-            // CREW Spec for ID3 tags: https://docs.google.com/document/d/1KDBjcphaQs1h4Tjhr5ZimHKJSNFu4xLW7hIbIeg9ONQ/edit#heading=h.bvfddtf4843k
-            if([metadata.key isEqual:@"CREW"]){
-                
-                NSString* valueString;
-                valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
-            
-                if (self.onID3Metadata) {
-                    self.onID3Metadata(@{
-                                         @"type": @("metadata"),
-                                         @"key": metadata.key,
-                                         @"value": valueString,
-                                         @"time": @(CMTimeGetSeconds(metadata.time))
-                                         });
-                }
+            NSString* valueString = [[NSString alloc] initWithData:metadata.dataValue encoding:NSASCIIStringEncoding];
+            if (self.onID3Metadata) {
+                self.onID3Metadata(@{
+                                     @"type": @("metadata"),
+                                     @"key": metadata.key,
+                                     @"value": valueString,
+                                     @"time": @(CMTimeGetSeconds(metadata.time))
+                                     });
             }
         }
     }
