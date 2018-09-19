@@ -88,10 +88,9 @@ class BrightcovePlayer extends Component {
           this.props.onCuePoint &&
           this.props.onCuePoint(event.nativeEvent)
         }
-        onID3Metadata={event => {
+        onID3Metadata={event => 
           this.props.onID3Metadata &&
             this.props.onID3Metadata(event.nativeEvent)
-        }
         }
       />
     );

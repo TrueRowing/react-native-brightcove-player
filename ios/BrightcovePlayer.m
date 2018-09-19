@@ -339,6 +339,7 @@ BOOL _resizeAspectFill;
         for (AVMetadataItem* metadata in playerItem.timedMetadata)
         {
             
+            // CREW Spec for ID3 tags: https://docs.google.com/document/d/1KDBjcphaQs1h4Tjhr5ZimHKJSNFu4xLW7hIbIeg9ONQ/edit#heading=h.bvfddtf4843k
             if([metadata.key isEqual:@"CREW"]){
                 
                 NSString* valueString;
