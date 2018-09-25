@@ -14,8 +14,9 @@ import java.util.Map;
 
 
 public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerView> {
-    public static final String REACT_CLASS = "BrightcovePlayer";
-    public static final int COMMAND_SEEK_TO = 1;
+
+    private static final String REACT_CLASS = "BrightcovePlayer";
+    private static final int COMMAND_SEEK_TO = 1;
     public static final String EVENT_READY = "ready";
     public static final String EVENT_PLAY = "play";
     public static final String EVENT_PAUSE = "pause";
@@ -25,8 +26,6 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
 
-    private static ThemedReactContext context;
-
     @Override
     public String getName() {
         return REACT_CLASS;
@@ -34,9 +33,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
 
     @Override
     public BrightcovePlayerView createViewInstance(ThemedReactContext ctx) {
-        context = ctx;
-        BrightcovePlayerView brightcovePlayerView = new BrightcovePlayerView(ctx);
-        return brightcovePlayerView;
+        return new BrightcovePlayerView(ctx);
     }
 
     @ReactProp(name = "policyKey")
@@ -93,8 +90,8 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         Assertions.assertNotNull(args);
         switch (commandType) {
             case COMMAND_SEEK_TO: {
+                assert args != null;
                 view.seekTo((int)(args.getDouble(0) * 1000));
-                return;
             }
         }
     }
@@ -102,14 +99,14 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @Override
     public @Nullable Map <String,Object> getExportedCustomDirectEventTypeConstants() {
         Map<String, Object> map = new HashMap<>();
-        map.put(EVENT_READY, (Object) MapBuilder.of("registrationName", "onReady"));
-        map.put(EVENT_PLAY, (Object) MapBuilder.of("registrationName", "onPlay"));
-        map.put(EVENT_PAUSE, (Object) MapBuilder.of("registrationName", "onPause"));
-        map.put(EVENT_END, (Object) MapBuilder.of("registrationName", "onEnd"));
-        map.put(EVENT_PROGRESS, (Object) MapBuilder.of("registrationName", "onProgress"));
-        map.put(EVENT_CHANGE_DURATION, (Object) MapBuilder.of("registrationName", "onChangeDuration"));
-        map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
-        map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
+        map.put(EVENT_READY, MapBuilder.of("registrationName", "onReady"));
+        map.put(EVENT_PLAY, MapBuilder.of("registrationName", "onPlay"));
+        map.put(EVENT_PAUSE, MapBuilder.of("registrationName", "onPause"));
+        map.put(EVENT_END, MapBuilder.of("registrationName", "onEnd"));
+        map.put(EVENT_PROGRESS, MapBuilder.of("registrationName", "onProgress"));
+        map.put(EVENT_CHANGE_DURATION, MapBuilder.of("registrationName", "onChangeDuration"));
+        map.put(EVENT_UPDATE_BUFFER_PROGRESS, MapBuilder.of("registrationName", "onUpdateBufferProgress"));
+        map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
         return map;
     }
 }

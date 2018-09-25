@@ -1,12 +1,12 @@
 package jp.manse;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
-import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
-import android.util.Log;
+//import android.util.Log;
+//import java.util.Map;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.edge.Catalog;
@@ -25,10 +25,10 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
-import java.util.Map;
 
+@SuppressLint("ViewConstructor")
 public class BrightcovePlayerView extends RelativeLayout {
-    private ThemedReactContext context;
+
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
@@ -38,7 +38,6 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
-    private boolean fullscreen = false;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -46,10 +45,9 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
         this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -234,6 +232,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         int viewWidth = this.getMeasuredWidth();
         int viewHeight = this.getMeasuredHeight();
         SurfaceView surfaceView = (SurfaceView) this.playerVideoView.getRenderView();
+        assert surfaceView != null;
         surfaceView.measure(viewWidth, viewHeight);
         int surfaceWidth = surfaceView.getMeasuredWidth();
         int surfaceHeight = surfaceView.getMeasuredHeight();
@@ -242,10 +241,10 @@ public class BrightcovePlayerView extends RelativeLayout {
         surfaceView.layout(leftOffset, topOffset, leftOffset + surfaceWidth, topOffset + surfaceHeight);
     }
 
-    private void printKeys(Map<String, Object> map) {
-        Log.d("debug", "-----------");
-        for(Map.Entry<String, Object> entry : map.entrySet()) {
-            Log.d("debug", entry.getKey());
-        }
-    }
+//    private void printKeys(Map<String, Object> map) {
+//        Log.d("debug", "-----------");
+//        for(Map.Entry<String, Object> entry : map.entrySet()) {
+//            Log.d("debug", entry.getKey());
+//        }
+//    }
 }

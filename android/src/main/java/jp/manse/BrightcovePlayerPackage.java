@@ -7,15 +7,13 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class BrightcovePlayerPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
-        List<NativeModule> modules = new ArrayList<>();
-        return modules;
+        return new ArrayList<>();
     }
 
     public List<Class<? extends JavaScriptModule>> createJSModules() {
@@ -24,7 +22,7 @@ public class BrightcovePlayerPackage implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Arrays.<ViewManager>asList(
+        return Collections.<ViewManager>singletonList(
                 new BrightcovePlayerManager()
         );
     }
