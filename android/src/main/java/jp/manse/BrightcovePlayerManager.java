@@ -118,6 +118,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         map.put(EVENT_CHANGE_DURATION, (Object) MapBuilder.of("registrationName", "onChangeDuration"));
         map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
         map.put(EVENT_ID3_METADATA, (Object) MapBuilder.of("registrationName", "onID3Metadata"));
+        map.put(EVENT_ONSTATUS, (Object) MapBuilder.of("registrationName", "onStatusEvent"));
         map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
         return map;
     }
