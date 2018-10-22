@@ -119,10 +119,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
-                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                        BrightcovePlayerManager.EVENT_READY, event);
                 event.putString("type", "ready");
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
                         BrightcovePlayerManager.EVENT_ONSTATUS, event);
             }
@@ -132,10 +130,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             public void processEvent(Event e) {
                 BrightcovePlayerView.this.playing = true;
                 WritableMap event = Arguments.createMap();
-                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                        BrightcovePlayerManager.EVENT_PLAY, event);
                 event.putString("type", "play");
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
                         BrightcovePlayerManager.EVENT_ONSTATUS, event);
             }
@@ -145,24 +141,20 @@ public class BrightcovePlayerView extends RelativeLayout {
             public void processEvent(Event e) {
                 BrightcovePlayerView.this.playing = false;
                 WritableMap event = Arguments.createMap();
+                event.putString("type", "pause");
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                        BrightcovePlayerManager.EVENT_PAUSE, event);
-                event.putString("type", "pause");
-                        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                                BrightcovePlayerManager.EVENT_ONSTATUS, event);
+                        BrightcovePlayerManager.EVENT_ONSTATUS, event);
             }
         });
         eventEmitter.on(EventType.COMPLETED, new EventListener() {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
+                event.putString("type", "complete");
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                        BrightcovePlayerManager.EVENT_END, event);
-                event.putString("type", "complete");
-                        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(),
-                                BrightcovePlayerManager.EVENT_ONSTATUS, event);
+                        BrightcovePlayerManager.EVENT_ONSTATUS, event);
             }
         });
         eventEmitter.on(EventType.PROGRESS, new EventListener() {
