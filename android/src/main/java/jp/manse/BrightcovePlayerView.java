@@ -59,13 +59,19 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
-        this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
-        this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
+
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        this.addView(this.playerVideoView);
+        this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
@@ -177,6 +183,25 @@ public class BrightcovePlayerView extends RelativeLayout {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.i("BrightcovePlayerView", "detachedFromWindow");
+        EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        eventEmitter.off();
+
+        final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+        exoPlayerVideoDisplayComponent.removeListeners();
+        exoPlayerVideoDisplayComponent.setMetadataListener((ExoPlayerVideoDisplayComponent.MetadataListener)null);
+
+        playerVideoView.setMediaController((BrightcoveMediaController) null);
+        removeView(playerVideoView);
+
+        playerVideoView = null;
+        mediaController = null;
     }
 
     private void sendEvent(BinaryFrame binaryFrame) {
