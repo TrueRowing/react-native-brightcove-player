@@ -189,7 +189,6 @@ public class BrightcovePlayerView extends RelativeLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Log.i("BrightcovePlayerView", "detachedFromWindow2");
         playerVideoView.setMediaController((BrightcoveMediaController) null);
         playerVideoView.setOnTouchListener(null);
         playerVideoView.clear();
