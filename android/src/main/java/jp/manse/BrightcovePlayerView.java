@@ -1,5 +1,6 @@
 package jp.manse;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.view.ViewCompat;
@@ -9,6 +10,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.event.Event;
@@ -44,6 +46,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         this(context, null);
     }
 
+		@SuppressLint("NewApi")
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -147,6 +150,17 @@ public class BrightcovePlayerView extends RelativeLayout {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
+				eventEmitter.on(ExoPlayerVideoDisplayComponent.RENDITION_CHANGED, new EventListener() {
+						@Override
+						public void processEvent(Event e) {
+								com.google.android.exoplayer2.Format format =
+												(com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+								WritableMap event = Arguments.createMap();
+								event.putInt("bitrate", format.bitrate);
+								ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+								reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
+						}
+				});
     }
 
     public void setPolicyKey(String policyKey) {

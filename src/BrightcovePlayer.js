@@ -80,6 +80,10 @@ class BrightcovePlayer extends Component {
               this.props.onExitFullscreen(event.nativeEvent);
           }
         }}
+        onBitrateUpdate={event =>
+            this.props.onBitrateUpdate &&
+            this.props.onBitrateUpdate(event.nativeEvent)
+        }
       />
     );
   }
@@ -118,6 +122,7 @@ BrightcovePlayer.propTypes = {
   onProgress: PropTypes.func,
   onChangeDuration: PropTypes.func,
   onUpdateBufferProgress: PropTypes.func,
+  onBitrateUpdate: PropTypes.func,
   onEnterFullscreen: PropTypes.func,
   onExitFullscreen: PropTypes.func
 };
