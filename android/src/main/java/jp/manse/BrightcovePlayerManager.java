@@ -1,6 +1,7 @@
 package jp.manse;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReadableArray;
@@ -25,6 +26,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
 		public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
+    public static final String EVENT_ID3_METADATA = "id3_metadata";
 
     private static ThemedReactContext context;
 
@@ -55,6 +57,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         view.setVideoId(videoId);
     }
 
+    @ReactProp(name = "playbackUrl")
+    public void setPlaybackUrl(BrightcovePlayerView view, String playbackUrl) {
+        view.setPlaybackUrl(playbackUrl);
+    }
+
     @ReactProp(name = "referenceId")
     public void setReferenceId(BrightcovePlayerView view, String referenceId) {
         view.setReferenceId(referenceId);
@@ -73,6 +80,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @ReactProp(name = "disableDefaultControl")
     public void setDefaultControlDisabled(BrightcovePlayerView view, boolean disableDefaultControl) {
         view.setDefaultControlDisabled(disableDefaultControl);
+    }
+
+    @ReactProp(name = "volume")
+    public void setVolume(BrightcovePlayerView view, float volume) {
+        view.setVolume(volume);
     }
 
     @ReactProp(name = "fullscreen")
@@ -110,6 +122,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         map.put(EVENT_PROGRESS, (Object) MapBuilder.of("registrationName", "onProgress"));
         map.put(EVENT_CHANGE_DURATION, (Object) MapBuilder.of("registrationName", "onChangeDuration"));
         map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
+        map.put(EVENT_ID3_METADATA, (Object) MapBuilder.of("registrationName", "onID3Metadata"));
         map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
 				map.put(EVENT_BITRATE_UPDATE, (Object) MapBuilder.of("registrationName", "onBitrateUpdate"));
         return map;

@@ -2,6 +2,7 @@ package jp.manse;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -13,13 +14,18 @@ import android.widget.RelativeLayout;
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
+import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.event.Event;
 import com.brightcove.player.event.EventEmitter;
 import com.brightcove.player.event.EventListener;
 import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
+import com.brightcove.player.model.Source;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
+import com.google.android.exoplayer2.metadata.Metadata;
+import com.google.android.exoplayer2.metadata.id3.Id3Frame;
+import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -27,15 +33,19 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
+import java.util.HashMap;
+import java.io.File;
 import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
+
     private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
     private String accountId;
     private String videoId;
+    private String playbackUrl;
     private String referenceId;
     private Catalog catalog;
     private boolean autoPlay = true;
@@ -53,15 +63,42 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
-        this.addView(this.playerVideoView);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
-        this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        this.addView(this.playerVideoView);
+        this.requestLayout();
+
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+
+        eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                exoPlayerVideoDisplayComponent.setMetadataListener(new ExoPlayerVideoDisplayComponent.MetadataListener() {
+                    @Override
+                    public void onMetadata(Metadata metadata) {
+                        for(int i = 0; i < metadata.length(); i++) {
+                            Metadata.Entry entry = metadata.get(i);
+                            if (entry instanceof Id3Frame) {
+                                BinaryFrame binaryFrame = (BinaryFrame) entry;
+                                sendEvent(binaryFrame);
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
         eventEmitter.on(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
             @Override
             public void processEvent(Event e) {
@@ -163,6 +200,36 @@ public class BrightcovePlayerView extends RelativeLayout {
 				});
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        playerVideoView.setMediaController((BrightcoveMediaController) null);
+        playerVideoView.setOnTouchListener(null);
+        playerVideoView.clear();
+        EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
+        eventEmitter.off();
+
+        final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+        playerVideoView.removeListeners();
+        if (exoPlayerVideoDisplayComponent.getExoPlayer() != null) {
+            exoPlayerVideoDisplayComponent.getExoPlayer().release();
+        }
+        exoPlayerVideoDisplayComponent.removeListeners();
+        exoPlayerVideoDisplayComponent.setMetadataListener((ExoPlayerVideoDisplayComponent.MetadataListener)null);
+
+        removeView(playerVideoView);
+    }
+
+    private void sendEvent(BinaryFrame binaryFrame) {
+        WritableMap event = Arguments.createMap();
+        event.putString("key", binaryFrame.id);
+        event.putString("value", new String(binaryFrame.data));
+        event.putString("type", "metadata");
+        ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_ID3_METADATA, event);
+    }
+
     public void setPolicyKey(String policyKey) {
         this.policyKey = policyKey;
         this.setupCatalog();
@@ -178,6 +245,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     public void setVideoId(String videoId) {
         this.videoId = videoId;
         this.referenceId = null;
+        this.playbackUrl = null;
         this.setupCatalog();
         this.loadMovie();
     }
@@ -185,6 +253,15 @@ public class BrightcovePlayerView extends RelativeLayout {
     public void setReferenceId(String referenceId) {
         this.referenceId = referenceId;
         this.videoId = null;
+        this.playbackUrl = null;
+        this.setupCatalog();
+        this.loadMovie();
+    }
+
+    public void setPlaybackUrl(String playbackUrl) {
+        this.playbackUrl = playbackUrl;
+        this.videoId = null;
+        this.referenceId = null;
         this.setupCatalog();
         this.loadMovie();
     }
@@ -215,6 +292,12 @@ public class BrightcovePlayerView extends RelativeLayout {
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_TOGGLE_ANDROID_FULLSCREEN, event);
     }
 
+    public void setVolume(float volume) {
+        Map<String, Object> details = new HashMap<>();
+        details.put(Event.VOLUME, volume);
+        this.playerVideoView.getEventEmitter().emit(EventType.SET_VOLUME, details);
+    }
+
     public void seekTo(int time) {
         this.playerVideoView.seekTo(time);
     }
@@ -226,21 +309,30 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     private void loadMovie() {
         if (this.catalog == null) return;
-        VideoListener listener = new VideoListener() {
-
-            @Override
-            public void onVideo(Video video) {
-                BrightcovePlayerView.this.playerVideoView.clear();
-                BrightcovePlayerView.this.playerVideoView.add(video);
-                if (BrightcovePlayerView.this.autoPlay) {
-                    BrightcovePlayerView.this.playerVideoView.start();
-                }
+        if (this.playbackUrl != null) {
+            this.playerVideoView.clear();
+            Video video = Video.createVideo(this.playbackUrl);
+            this.playerVideoView.add(video);
+            if (BrightcovePlayerView.this.autoPlay) {
+                BrightcovePlayerView.this.playerVideoView.start();
             }
-        };
-        if (this.videoId != null) {
-            this.catalog.findVideoByID(this.videoId, listener);
-        } else if (this.referenceId != null) {
-            this.catalog.findVideoByReferenceID(this.referenceId, listener);
+        } else {
+            VideoListener listener = new VideoListener() {
+
+                @Override
+                public void onVideo(Video video) {
+                    BrightcovePlayerView.this.playerVideoView.clear();
+                    BrightcovePlayerView.this.playerVideoView.add(video);
+                    if (BrightcovePlayerView.this.autoPlay) {
+                        BrightcovePlayerView.this.playerVideoView.start();
+                    }
+                }
+            };
+            if (this.videoId != null) {
+                this.catalog.findVideoByID(this.videoId, listener);
+            } else if (this.referenceId != null) {
+                this.catalog.findVideoByReferenceID(this.referenceId, listener);
+            }
         }
     }
 
