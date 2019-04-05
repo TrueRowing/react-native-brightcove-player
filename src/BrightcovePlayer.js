@@ -81,9 +81,9 @@ class BrightcovePlayer extends Component {
                     }
                 }}
                 onBitrateUpdate={event =>
-                            this.props.onBitrateUpdate &&
-                            this.props.onBitrateUpdate(event.nativeEvent)
-                        }
+                    this.props.onBitrateUpdate &&
+                    this.props.onBitrateUpdate(event.nativeEvent)
+                }
                 onStatusEvent={event =>
                     this.props.onStatusEvent &&
                     this.props.onStatusEvent(event.nativeEvent)

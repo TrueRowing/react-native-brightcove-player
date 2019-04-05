@@ -194,6 +194,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 												(com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
 								WritableMap event = Arguments.createMap();
 								event.putInt("bitrate", format.bitrate);
+								Log.d("BrightcovePlayerView", "Bitrate udpated : " + String.valueOf(format.bitrate));
 								ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
 								reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
 						}
