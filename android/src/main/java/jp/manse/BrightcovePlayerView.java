@@ -47,6 +47,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private String videoId;
     private String playbackUrl;
     private String referenceId;
+    private Double currentTime;
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
@@ -144,7 +145,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
                 Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
-                event.putDouble("currentTime", playhead / 1000d);
+								currentTime = playhead / 1000d;
+                event.putDouble("currentTime", currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
             }
@@ -194,7 +196,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 												(com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
 								WritableMap event = Arguments.createMap();
 								event.putInt("bitrate", format.bitrate);
-								Log.d("BrightcovePlayerView", "Bitrate udpated : " + String.valueOf(format.bitrate));
+								event.putDouble("currentTime", currentTime);
 								ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
 								reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
 						}
