@@ -146,7 +146,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
                 Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
-								currentTime = playhead / 1000d;
+                currentTime = playhead / 1000d;
                 event.putDouble("currentTime", currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
@@ -190,19 +190,19 @@ public class BrightcovePlayerView extends RelativeLayout {
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
             }
         });
-				eventEmitter.on(ExoPlayerVideoDisplayComponent.RENDITION_CHANGED, new EventListener() {
-						@Override
-						public void processEvent(Event e) {
-								com.google.android.exoplayer2.Format format =
-												(com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
-								WritableMap event = Arguments.createMap();
-								event.putInt("bitrate", format.bitrate);
-								event.putDouble("currentTime", currentTime);
-								Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
-								ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-								reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
-						}
-				});
+        eventEmitter.on(ExoPlayerVideoDisplayComponent.RENDITION_CHANGED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                com.google.android.exoplayer2.Format format =
+                (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+                WritableMap event = Arguments.createMap();
+                event.putInt("bitrate", format.bitrate);
+                event.putDouble("currentTime", currentTime);
+                Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
+            }
+        });
     }
 
     @Override
