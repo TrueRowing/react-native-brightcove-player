@@ -69,7 +69,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     @Override
     protected void onAttachedToWindow() {
-        BrightcovePlayerView that = this;
+        final BrightcovePlayerView that = this;
         super.onAttachedToWindow();
         this.addView(this.playerVideoView);
         this.requestLayout();
@@ -273,16 +273,14 @@ public class BrightcovePlayerView extends RelativeLayout {
                 that.sendStatus("didSeekTo");
             }
         });
-        eventEmitter.on(EventType.ERROR, (Event e) -> {
-                WritableMap event = Arguments.createMap();
-                event.putString("type", "fail");
-                if (e.properties.containsKey("kBCOVPlaybackSessionEventKeyError")) {
-                    event.putString("error", String.valueOf(e.properties.get("kBCOVPlaybackSessionEventKeyError")));
-                } else {
-                    event.putString("error", null);
-                }
-                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_STATUS, event);
+        eventEmitter.on(EventType.ERROR, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                Error error = e.properties.containsKey(Event.ERROR)
+                    ? (Error)e.properties.get(Event.ERROR)
+                    : null;
+                that.sendStatus("fail", error == null ? null : error.getLocalizedMessage());
+            }
         });
     }
 
@@ -416,16 +414,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             };
             if (this.videoId != null) {
                 this.catalog.findVideoByID(this.videoId, listener);
-                if (this.playerVideoView.getCurrentVideo() == null) {
-                    this.sendStatus("loadFail", "Could not find video with videoId: " + this.videoId);
-                }
             } else if (this.referenceId != null) {
                 this.catalog.findVideoByReferenceID(this.referenceId, listener);
-                if (this.playerVideoView.getCurrentVideo() == null) {
-                    this.sendStatus("loadFail", "Could not find video with refereceId: " + this.referenceId);
-                }
-            } else {
-                this.sendStatus("loadFail", "Could not find video: videoId and referenceId both null");
             }
         }
     }

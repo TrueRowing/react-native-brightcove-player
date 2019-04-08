@@ -48,7 +48,6 @@ android {
         warning 'InvalidPackage'
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
     }
 }
 
