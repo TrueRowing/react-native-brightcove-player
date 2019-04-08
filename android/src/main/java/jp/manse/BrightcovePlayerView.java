@@ -47,7 +47,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private String videoId;
     private String playbackUrl;
     private String referenceId;
-    private Double currentTime;
+    private Double currentTime = 0.0;
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
