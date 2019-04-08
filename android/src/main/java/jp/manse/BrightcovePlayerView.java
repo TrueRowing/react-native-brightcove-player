@@ -39,6 +39,7 @@ import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
 
+		private static String TAG = "BrightcovePlayerView";
     private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
@@ -197,7 +198,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 								WritableMap event = Arguments.createMap();
 								event.putInt("bitrate", format.bitrate);
 								event.putDouble("currentTime", currentTime);
-								Log.d("BrightcovePlayerView", "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
+								Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
 								ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
 								reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
 						}
