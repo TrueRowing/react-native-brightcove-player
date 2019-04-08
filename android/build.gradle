@@ -47,8 +47,6 @@ android {
     lintOptions {
         warning 'InvalidPackage'
     }
-    compileOptions {
-    }
 }
 
 dependencies {
