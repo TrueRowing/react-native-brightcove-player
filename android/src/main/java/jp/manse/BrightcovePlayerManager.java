@@ -25,6 +25,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
+		public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
     public static final String EVENT_ID3_METADATA = "id3_metadata";
 
     private static ThemedReactContext context;
@@ -123,6 +124,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         map.put(EVENT_UPDATE_BUFFER_PROGRESS, (Object) MapBuilder.of("registrationName", "onUpdateBufferProgress"));
         map.put(EVENT_ID3_METADATA, (Object) MapBuilder.of("registrationName", "onID3Metadata"));
         map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
+				map.put(EVENT_BITRATE_UPDATE, (Object) MapBuilder.of("registrationName", "onBitrateUpdate"));
         return map;
     }
 }

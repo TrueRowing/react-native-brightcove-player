@@ -1,5 +1,6 @@
 package jp.manse;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Environment;
 import android.os.Handler;
@@ -10,6 +11,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
@@ -37,6 +39,7 @@ import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
 
+		private static String TAG = "BrightcovePlayerView";
     private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
@@ -45,6 +48,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private String videoId;
     private String playbackUrl;
     private String referenceId;
+    private Double currentTime = 0.0;
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
@@ -54,6 +58,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         this(context, null);
     }
 
+		@SuppressLint("NewApi")
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
@@ -141,7 +146,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
                 Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
-                event.putDouble("currentTime", playhead / 1000d);
+                currentTime = playhead / 1000d;
+                event.putDouble("currentTime", currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_PROGRESS, event);
             }
@@ -182,6 +188,19 @@ public class BrightcovePlayerView extends RelativeLayout {
                 event.putDouble("bufferProgress", percentComplete / 100d);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_UPDATE_BUFFER_PROGRESS, event);
+            }
+        });
+        eventEmitter.on(ExoPlayerVideoDisplayComponent.RENDITION_CHANGED, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                com.google.android.exoplayer2.Format format =
+                (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+                WritableMap event = Arguments.createMap();
+                event.putInt("bitrate", format.bitrate);
+                event.putDouble("currentTime", currentTime);
+                Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
+                ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
             }
         });
     }
