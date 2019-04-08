@@ -39,7 +39,7 @@ import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
 
-		private static String TAG = "BrightcovePlayerView";
+    private static String TAG = "BrightcovePlayerView";
     private ThemedReactContext context;
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
@@ -58,7 +58,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         this(context, null);
     }
 
-		@SuppressLint("NewApi")
+    @SuppressLint("NewApi")
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
