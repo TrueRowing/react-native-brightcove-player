@@ -223,14 +223,15 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 com.google.android.exoplayer2.Format format =
-                (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+                    (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
                 WritableMap event = Arguments.createMap();
                 event.putInt("bitrate", format.bitrate);
                 event.putDouble("currentTime", currentTime);
-                Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : "+ currentTime);
+                Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : " + currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
             }
+        });
         eventEmitter.on(EventType.BUFFERING_COMPLETED, new EventListener() {
             @Override
             public void processEvent(Event e) {
