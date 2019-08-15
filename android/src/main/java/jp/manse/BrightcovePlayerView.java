@@ -52,6 +52,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private boolean autoPlay = true;
     private boolean playing = false;
     private boolean fullscreen = false;
+    private final DefaultBandwidthMeter defaultBandwidthMeter;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -66,15 +67,11 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
 
         final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
-        final DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
+        defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
                 .setInitialBitrateEstimate(defaultMaxInitialBitrate)
                 .build();
         final AdaptiveTrackSelection.Factory videoTrackSelectionFactory =
                 new AdaptiveTrackSelection.Factory();
-
-        ExoPlayerVideoDisplayComponent component = (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
-        component = (ExoPlayerVideoDisplayComponent)this.playerVideoView.getVideoDisplay();
-        component.setBandwidthMeter(defaultBandwidthMeter);
 
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -98,6 +95,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                exoPlayerVideoDisplayComponent.setBandwidthMeter(defaultBandwidthMeter);
                 exoPlayerVideoDisplayComponent.setMetadataListener(new ExoPlayerVideoDisplayComponent.MetadataListener() {
                     @Override
                     public void onMetadata(Metadata metadata) {
