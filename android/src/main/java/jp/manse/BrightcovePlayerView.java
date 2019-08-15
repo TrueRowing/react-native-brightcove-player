@@ -21,6 +21,11 @@ import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
+import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+
+
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -59,6 +64,18 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
+
+        final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
+        final DefaultBandwidthMeter defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
+                .setInitialBitrateEstimate(defaultMaxInitialBitrate)
+                .build();
+        final AdaptiveTrackSelection.Factory videoTrackSelectionFactory =
+                new AdaptiveTrackSelection.Factory();
+
+        ExoPlayerVideoDisplayComponent component = (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+        component = (ExoPlayerVideoDisplayComponent)this.playerVideoView.getVideoDisplay();
+        component.setBandwidthMeter(defaultBandwidthMeter);
+
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
@@ -223,7 +240,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 com.google.android.exoplayer2.Format format =
-                    (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+                        (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
                 WritableMap event = Arguments.createMap();
                 event.putInt("bitrate", format.bitrate);
                 event.putDouble("currentTime", currentTime);
@@ -278,8 +295,8 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 Error error = e.properties.containsKey(Event.ERROR)
-                    ? (Error)e.properties.get(Event.ERROR)
-                    : null;
+                        ? (Error)e.properties.get(Event.ERROR)
+                        : null;
                 that.sendStatus("fail", error == null ? null : error.getLocalizedMessage());
             }
         });
