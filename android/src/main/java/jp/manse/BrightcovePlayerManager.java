@@ -1,7 +1,6 @@
 package jp.manse;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReadableArray;
@@ -17,6 +16,7 @@ import java.util.Map;
 public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerView> {
     public static final String REACT_CLASS = "BrightcovePlayer";
     public static final int COMMAND_SEEK_TO = 1;
+    public static final int COMMAND_SELECT_AUDIO_TRACK = 2;
     public static final String EVENT_READY = "ready";
     public static final String EVENT_PLAY = "play";
     public static final String EVENT_PAUSE = "pause";
@@ -96,8 +96,8 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of(
-                "seekTo",
-                COMMAND_SEEK_TO
+            "seekTo", COMMAND_SEEK_TO,
+            "selectAudioTrack", COMMAND_SELECT_AUDIO_TRACK
         );
     }
 
@@ -108,7 +108,11 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         switch (commandType) {
             case COMMAND_SEEK_TO: {
                 view.seekTo((int)(args.getDouble(0) * 1000));
-                return;
+                break;
+            }
+            case COMMAND_SELECT_AUDIO_TRACK: {
+                view.selectAudioTrack(args.getString(0));
+                break;
             }
         }
     }

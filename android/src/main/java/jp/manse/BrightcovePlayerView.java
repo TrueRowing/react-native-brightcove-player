@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.RelativeLayout;
 
+import com.brightcove.player.controller.HydrowAudioTracksController;
 import com.brightcove.player.display.ExoPlayerVideoDisplayComponent;
 import com.brightcove.player.edge.Catalog;
 import com.brightcove.player.edge.VideoListener;
@@ -29,12 +30,14 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BrightcovePlayerView extends RelativeLayout {
 
     private static String TAG = "BrightcovePlayerView";
-    private ThemedReactContext context;
+    private HydrowAudioTracksController audioTracksController;
+    private Map<String, Integer> audioTrackMap = new HashMap<>();
     private BrightcoveExoPlayerVideoView playerVideoView;
     private BrightcoveMediaController mediaController;
     private String policyKey;
@@ -46,7 +49,6 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
-    private boolean fullscreen = false;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -55,12 +57,12 @@ public class BrightcovePlayerView extends RelativeLayout {
     @SuppressLint("NewApi")
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
-        this.context = context;
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
+        this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
         ViewCompat.setTranslationZ(this, 9999);
@@ -76,7 +78,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
-                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+            (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
 
         eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
             @Override
@@ -283,6 +285,26 @@ public class BrightcovePlayerView extends RelativeLayout {
                 that.sendStatus("fail", error == null ? null : error.getLocalizedMessage());
             }
         });
+        eventEmitter.on(EventType.AUDIO_TRACKS, new EventListener() {
+            @Override
+            public void processEvent(Event e) {
+                if (e.properties.containsKey(Event.TRACKS)) {
+                    List<String> audioTracks = (List)e.properties.get(Event.TRACKS);
+                    for (int trackNumber = 0 ; trackNumber < audioTracks.size() ; trackNumber++) {
+                        that.audioTrackMap.put(audioTracks.get(trackNumber), trackNumber);
+                    }
+                }
+            }
+        });
+    }
+
+    public void selectAudioTrack(String name) {
+        if (this.audioTrackMap.containsKey(name)) {
+            Integer index = this.audioTrackMap.get(name);
+            if (index != null) {
+                this.audioTracksController.selectAudioTrack(index);
+            }
+        }
     }
 
     @Override
@@ -295,7 +317,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.off();
 
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
-                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+            (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
         playerVideoView.removeListeners();
         if (exoPlayerVideoDisplayComponent.getExoPlayer() != null) {
             exoPlayerVideoDisplayComponent.getExoPlayer().release();
