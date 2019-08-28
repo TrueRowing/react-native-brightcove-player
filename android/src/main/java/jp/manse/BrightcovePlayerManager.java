@@ -25,7 +25,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
-		public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
+    public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
     public static final String EVENT_ID3_METADATA = "id3_metadata";
     public static final String EVENT_STATUS = "status";
 
@@ -107,11 +107,15 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         Assertions.assertNotNull(args);
         switch (commandType) {
             case COMMAND_SEEK_TO: {
-                view.seekTo((int)(args.getDouble(0) * 1000));
+                if (args != null && args.size() > 0) {
+                    view.seekTo((int)(args.getDouble(0) * 1000));
+                }
                 break;
             }
             case COMMAND_SELECT_AUDIO_TRACK: {
-                view.selectAudioTrack(args.getString(0));
+                if (args != null && args.size() > 0) {
+                    view.selectAudioTrack(args.getString(0));
+                }
                 break;
             }
         }
