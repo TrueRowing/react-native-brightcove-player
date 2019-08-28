@@ -24,7 +24,7 @@ class BrightcovePlayer extends Component {
     render() {
         return (
             <NativeBrightcovePlayer
-                ref={e => { console.log('TIM', e); this._root = e; }}
+                ref={e => this._root = e}
                 {...this.props}
                 style={[
                     this.props.style,
