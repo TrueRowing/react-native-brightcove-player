@@ -10,6 +10,7 @@ import ReactNative, {
 } from 'react-native';
 
 class BrightcovePlayer extends Component {
+
     state = {
         androidFullscreen: false
     };
@@ -23,7 +24,7 @@ class BrightcovePlayer extends Component {
     render() {
         return (
             <NativeBrightcovePlayer
-                ref={e => (this._root = e)}
+                ref={e => this._root = e}
                 {...this.props}
                 style={[
                     this.props.style,
@@ -116,6 +117,14 @@ BrightcovePlayer.prototype.seekTo = Platform.select({
         );
     }
 });
+
+BrightcovePlayer.prototype.selectAudioTrack = function(trackName) {
+    UIManager.dispatchViewManagerCommand(
+        ReactNative.findNodeHandle(this._root),
+        UIManager.BrightcovePlayer.Commands.selectAudioTrack,
+        [trackName]
+    );
+};
 
 BrightcovePlayer.propTypes = {
     ...(ViewPropTypes || View.propTypes),
