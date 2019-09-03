@@ -19,6 +19,7 @@ import com.brightcove.player.event.EventType;
 import com.brightcove.player.mediacontroller.BrightcoveMediaController;
 import com.brightcove.player.model.Video;
 import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
+import com.facebook.react.bridge.WritableArray;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
@@ -305,6 +306,20 @@ public class BrightcovePlayerView extends RelativeLayout {
                 this.audioTracksController.selectAudioTrack(index);
             }
         }
+    }
+
+    public void getAudioTracks() {
+        WritableArray audioTracks = Arguments.createArray();
+        for(String audioTrack : this.audioTrackMap.keySet()) {
+            audioTracks.pushString(audioTrack);
+        }
+        WritableMap event = Arguments.createMap();
+        event.putArray("audioTracks", audioTracks);
+        ReactContext context = (ReactContext)getContext();
+        context.getJSModule(RCTEventEmitter.class).receiveEvent(
+            getId(),
+            BrightcovePlayerManager.TOP_CHANGE,
+            event);
     }
 
     @Override

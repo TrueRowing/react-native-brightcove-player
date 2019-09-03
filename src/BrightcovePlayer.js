@@ -21,6 +21,12 @@ class BrightcovePlayer extends Component {
         }
     };
 
+    onChange = (event) => {
+        if (event.nativeEvent.audioTracks && this.props.onAudioTracks) {
+            this.props.onAudioTracks(new Set(event.nativeEvent.audioTracks));
+        }
+    }
+
     render() {
         return (
             <NativeBrightcovePlayer
@@ -97,6 +103,7 @@ class BrightcovePlayer extends Component {
                     this.props.onID3Metadata &&
                     this.props.onID3Metadata(event.nativeEvent)
                 }
+                onChange={this.onChange}
             />
         );
     }
@@ -117,6 +124,14 @@ BrightcovePlayer.prototype.seekTo = Platform.select({
         );
     }
 });
+
+BrightcovePlayer.prototype.getAudioTracks = function() {
+    UIManager.dispatchViewManagerCommand(
+        ReactNative.findNodeHandle(this._root),
+        UIManager.BrightcovePlayer.Commands.getAudioTracks,
+        []
+    );
+}
 
 BrightcovePlayer.prototype.selectAudioTrack = function(trackName) {
     UIManager.dispatchViewManagerCommand(
@@ -152,6 +167,7 @@ BrightcovePlayer.propTypes = {
     onStatusEvent: PropTypes.func,
     onCuePoint: PropTypes.func,
     onID3Metadata: PropTypes.func,
+    onAudioTracks: PropTypes.func,
 };
 
 BrightcovePlayer.defaultProps = {};
