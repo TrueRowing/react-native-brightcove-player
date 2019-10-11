@@ -60,4 +60,5 @@ configurations.all {
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation 'com.brightcove.player:exoplayer2:6.8.1'
+    implementation "com.google.android.exoplayer:exoplayer:2.9.6"
 }
