@@ -67,7 +67,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         super(context, attrs);
         this.setBackgroundColor(Color.BLACK);
 
-        this.playerVideoView = new BrightcoveExoPlayerVideoView(this.context);
+        this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
 
         final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
