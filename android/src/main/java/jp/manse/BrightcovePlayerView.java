@@ -68,7 +68,6 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
-        this.addView(this.playerVideoView);
         final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
                 .setInitialBitrateEstimate(defaultMaxInitialBitrate)
@@ -79,7 +78,6 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
-        this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
     }
@@ -98,7 +96,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                exoPlayerVideoDisplayComponent.setBandwidthMeter(defaultBandwidthMeter);
+//                exoPlayerVideoDisplayComponent.setBandwidthMeter(defaultBandwidthMeter);
                 exoPlayerVideoDisplayComponent.setMetadataListener(new ExoPlayerVideoDisplayComponent.MetadataListener() {
                     @Override
                     public void onMetadata(Metadata metadata) {
