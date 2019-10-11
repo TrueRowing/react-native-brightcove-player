@@ -29,6 +29,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
+    private DefaultBandwidthMeter defaultBandwidthMeter;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -61,6 +63,12 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
+        final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
+        defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
+                .setInitialBitrateEstimate(defaultMaxInitialBitrate)
+                .build();
+
+//done add
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
@@ -80,6 +88,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
             (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+        exoPlayerVideoDisplayComponent.setBandwidthMeter(defaultBandwidthMeter);
 
         eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
             @Override
