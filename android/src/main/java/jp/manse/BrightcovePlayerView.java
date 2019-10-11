@@ -193,7 +193,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
-                Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
+                int playhead = (int) e.properties.get(Event.PLAYHEAD_POSITION);
                 currentTime = playhead / 1000d;
                 event.putDouble("currentTime", currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
