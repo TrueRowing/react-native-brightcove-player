@@ -64,11 +64,10 @@ public class BrightcovePlayerView extends RelativeLayout {
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
         final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
+
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
                 .setInitialBitrateEstimate(defaultMaxInitialBitrate)
                 .build();
-
-//done add
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
