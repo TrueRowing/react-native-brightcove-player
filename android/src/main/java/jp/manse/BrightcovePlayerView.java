@@ -1,6 +1,7 @@
 package jp.manse;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -38,6 +39,7 @@ import java.util.Map;
 public class BrightcovePlayerView extends RelativeLayout {
 
     private static String TAG = "BrightcovePlayerView";
+    private static String BITRATE = "BITRATE";
     private HydrowAudioTracksController audioTracksController;
     private Map<String, Integer> audioTrackMap = new HashMap<>();
     private BrightcoveExoPlayerVideoView playerVideoView;
@@ -63,10 +65,8 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
-        final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
-
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
-                .setInitialBitrateEstimate(defaultMaxInitialBitrate)
+                .setInitialBitrateEstimate(getBitrate())
                 .build();
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
@@ -75,6 +75,20 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.playerVideoView.setMediaController(this.mediaController);
         ViewCompat.setTranslationZ(this, 9999);
 
+    }
+
+    private int getBitrate(){
+        SharedPreferences pref = getContext().getSharedPreferences(TAG, 0);
+        if (pref.contains(BITRATE)) {
+            return pref.getInt(BITRATE,Integer.MAX_VALUE);
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }
+
+    private void setBitrate(int bitrate){
+        SharedPreferences pref = getContext().getSharedPreferences(TAG, 0);
+        pref.edit().putInt(BITRATE, bitrate).apply();
     }
 
     @Override
@@ -239,6 +253,7 @@ public class BrightcovePlayerView extends RelativeLayout {
                 event.putInt("bitrate", format.bitrate);
                 event.putDouble("currentTime", currentTime);
                 Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : " + currentTime);
+                setBitrate(format.bitrate);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
             }
