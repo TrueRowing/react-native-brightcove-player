@@ -23,13 +23,13 @@ import com.facebook.react.bridge.WritableArray;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import java.util.HashMap;
 import java.util.List;
