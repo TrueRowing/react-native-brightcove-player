@@ -1,7 +1,6 @@
 package jp.manse;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReadableArray;
@@ -17,6 +16,8 @@ import java.util.Map;
 public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerView> {
     public static final String REACT_CLASS = "BrightcovePlayer";
     public static final int COMMAND_SEEK_TO = 1;
+    public static final int COMMAND_SELECT_AUDIO_TRACK = 2;
+    public static final int COMMAND_GET_AUDIO_TRACKS = 3;
     public static final String EVENT_READY = "ready";
     public static final String EVENT_PLAY = "play";
     public static final String EVENT_PAUSE = "pause";
@@ -25,9 +26,10 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     public static final String EVENT_TOGGLE_ANDROID_FULLSCREEN = "toggle_android_fullscreen";
     public static final String EVENT_CHANGE_DURATION = "change_duration";
     public static final String EVENT_UPDATE_BUFFER_PROGRESS = "update_buffer_progress";
-		public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
+    public static final String EVENT_BITRATE_UPDATE = "bitrate_update";
     public static final String EVENT_ID3_METADATA = "id3_metadata";
     public static final String EVENT_STATUS = "status";
+    public static final String TOP_CHANGE = "topChange";
 
     private static ThemedReactContext context;
 
@@ -96,8 +98,9 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
     @Override
     public Map<String, Integer> getCommandsMap() {
         return MapBuilder.of(
-                "seekTo",
-                COMMAND_SEEK_TO
+            "seekTo", COMMAND_SEEK_TO,
+            "selectAudioTrack", COMMAND_SELECT_AUDIO_TRACK,
+            "getAudioTracks", COMMAND_GET_AUDIO_TRACKS
         );
     }
 
@@ -107,8 +110,19 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         Assertions.assertNotNull(args);
         switch (commandType) {
             case COMMAND_SEEK_TO: {
-                view.seekTo((int)(args.getDouble(0) * 1000));
-                return;
+                if (args != null && args.size() > 0) {
+                    view.seekTo((int)(args.getDouble(0) * 1000));
+                }
+                break;
+            }
+            case COMMAND_SELECT_AUDIO_TRACK: {
+                if (args != null && args.size() > 0) {
+                    view.selectAudioTrack(args.getString(0));
+                }
+                break;
+            }
+            case COMMAND_GET_AUDIO_TRACKS: {
+                view.getAudioTracks();
             }
         }
     }
@@ -127,6 +141,7 @@ public class BrightcovePlayerManager extends SimpleViewManager<BrightcovePlayerV
         map.put(EVENT_TOGGLE_ANDROID_FULLSCREEN, (Object) MapBuilder.of("registrationName", "onToggleAndroidFullscreen"));
         map.put(EVENT_BITRATE_UPDATE, (Object) MapBuilder.of("registrationName", "onBitrateUpdate"));
         map.put(EVENT_STATUS, (Object) MapBuilder.of("registrationName", "onStatusEvent"));
+        map.put(TOP_CHANGE, MapBuilder.of("phasedRegistrationNames", MapBuilder.of("bubbled", "onChange")));
         return map;
     }
 }
