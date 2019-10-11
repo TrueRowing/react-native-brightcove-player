@@ -68,19 +68,18 @@ public class BrightcovePlayerView extends RelativeLayout {
         this.setBackgroundColor(Color.BLACK);
 
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
-
+        this.addView(this.playerVideoView);
         final long defaultMaxInitialBitrate = Integer.MAX_VALUE;
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
                 .setInitialBitrateEstimate(defaultMaxInitialBitrate)
                 .build();
-        final AdaptiveTrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory();
 
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
         this.playerVideoView.setMediaController(this.mediaController);
+        this.requestLayout();
         ViewCompat.setTranslationZ(this, 9999);
 
     }
