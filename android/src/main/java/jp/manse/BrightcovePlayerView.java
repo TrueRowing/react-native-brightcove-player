@@ -7,6 +7,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.controller.HydrowAudioTracksController;
@@ -54,6 +55,7 @@ public class BrightcovePlayerView extends RelativeLayout {
     private boolean autoPlay = true;
     private boolean playing = false;
     private DefaultBandwidthMeter defaultBandwidthMeter;
+    private ProgressBar progressBar;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -64,11 +66,18 @@ public class BrightcovePlayerView extends RelativeLayout {
         super(context, attrs);
         this.setBackgroundColor(Color.BLACK);
 
+        this.progressBar = new ProgressBar(context);
+        this.progressBar.setIndeterminate(true);
+        this.progressBar.setVisibility(VISIBLE);
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
                 .setInitialBitrateEstimate(getBitrate())
                 .build();
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) progressBar.getLayoutParams();
+        param.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        param.addRule(RelativeLayout.CENTER_VERTICAL);
+        this.progressBar.setLayoutParams(param);
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
@@ -96,6 +105,8 @@ public class BrightcovePlayerView extends RelativeLayout {
         final BrightcovePlayerView that = this;
         super.onAttachedToWindow();
         this.addView(this.playerVideoView);
+        this.addView(this.progressBar);
+
         this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
@@ -232,6 +243,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 that.sendStatus("bufferingStarted");
+                BrightcovePlayerView.this.progressBar.setVisibility(VISIBLE);
             }
         });
         eventEmitter.on(EventType.BUFFERED_UPDATE, new EventListener() {
@@ -262,6 +274,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 that.sendStatus("bufferingCompleted");
+                BrightcovePlayerView.this.progressBar.setVisibility(GONE);
             }
         });
         eventEmitter.on(EventType.WILL_INTERRUPT_CONTENT, new EventListener() {
