@@ -75,10 +75,6 @@ public class BrightcovePlayerView extends RelativeLayout {
                 .setInitialBitrateEstimate(getBitrate())
                 .build();
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) progressBar.getLayoutParams();
-        param.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        param.addRule(RelativeLayout.CENTER_VERTICAL);
-        this.progressBar.setLayoutParams(param);
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
         this.mediaController = new BrightcoveMediaController(this.playerVideoView);
@@ -107,6 +103,11 @@ public class BrightcovePlayerView extends RelativeLayout {
         super.onAttachedToWindow();
         this.addView(this.playerVideoView);
         this.addView(this.progressBar);
+
+        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) progressBar.getLayoutParams();
+        param.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        param.addRule(RelativeLayout.CENTER_VERTICAL);
+        this.progressBar.setLayoutParams(param);
 
         this.requestLayout();
 
