@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -341,6 +342,9 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.ERROR, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                if ( BrightcovePlayerView.this.progressBar.getVisibility() == View.VISIBLE) {
+                    BrightcovePlayerView.this.progressBar.setVisibility(GONE);
+                }
                 Error error = e.properties.containsKey(Event.ERROR)
                         ? (Error)e.properties.get(Event.ERROR)
                         : null;
