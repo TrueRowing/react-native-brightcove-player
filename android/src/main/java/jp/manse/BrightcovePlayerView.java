@@ -3,6 +3,7 @@ package jp.manse;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -69,6 +70,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 
         this.progressBar = new ProgressBar(context);
         this.progressBar.setIndeterminate(true);
+        this.progressBar.setIndeterminateDrawable(context.getDrawable(R.drawable.progress_indeterminate_anim_medium_material));
         this.progressBar.setVisibility(VISIBLE);
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
         defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
