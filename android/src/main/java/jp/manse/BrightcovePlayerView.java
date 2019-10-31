@@ -45,6 +45,7 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     private static String TAG = "BrightcovePlayerView";
     private static String BITRATE = "BITRATE";
+    private final int INITIAL_BITRATE = 3500000;
     private HydrowAudioTracksController audioTracksController;
     private Map<String, Integer> audioTrackMap = new HashMap<>();
     private BrightcoveExoPlayerVideoView playerVideoView;
@@ -104,9 +105,9 @@ public class BrightcovePlayerView extends RelativeLayout {
     private int getBitrate(){
         SharedPreferences pref = getContext().getSharedPreferences(TAG, 0);
         if (pref.contains(BITRATE)) {
-            return pref.getInt(BITRATE,Integer.MAX_VALUE);
+            return pref.getInt(BITRATE,INITIAL_BITRATE);
         } else {
-            return Integer.MAX_VALUE;
+            return INITIAL_BITRATE;
         }
     }
 
