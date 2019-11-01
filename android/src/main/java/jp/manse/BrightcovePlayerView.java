@@ -1,11 +1,17 @@
 package jp.manse;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.CircularProgressDrawable;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.brightcove.player.controller.HydrowAudioTracksController;
@@ -23,6 +29,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.id3.Id3Frame;
 import com.google.android.exoplayer2.metadata.id3.BinaryFrame;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -37,6 +44,8 @@ import java.util.Map;
 public class BrightcovePlayerView extends RelativeLayout {
 
     private static String TAG = "BrightcovePlayerView";
+    private static String BITRATE = "BITRATE";
+    private final int INITIAL_BITRATE = 3500000;
     private HydrowAudioTracksController audioTracksController;
     private Map<String, Integer> audioTrackMap = new HashMap<>();
     private BrightcoveExoPlayerVideoView playerVideoView;
@@ -50,6 +59,9 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
+    private boolean firstBuffering = true;
+    private DefaultBandwidthMeter defaultBandwidthMeter;
+    private ProgressBar progressBar;
 
     public BrightcovePlayerView(ThemedReactContext context) {
         this(context, null);
@@ -59,8 +71,11 @@ public class BrightcovePlayerView extends RelativeLayout {
     public BrightcovePlayerView(ThemedReactContext context, AttributeSet attrs) {
         super(context, attrs);
         this.setBackgroundColor(Color.BLACK);
-
         this.playerVideoView = new BrightcoveExoPlayerVideoView(context);
+        this.setupProgress(context);
+        defaultBandwidthMeter = new DefaultBandwidthMeter.Builder(context)
+                .setInitialBitrateEstimate(getBitrate())
+                .build();
         this.playerVideoView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         this.playerVideoView.finishInitialization();
         this.audioTracksController = new HydrowAudioTracksController(this.playerVideoView.getAudioTracksController());
@@ -70,16 +85,55 @@ public class BrightcovePlayerView extends RelativeLayout {
 
     }
 
+    private void setupProgress(ThemedReactContext context){
+        this.progressBar = new ProgressBar(context);
+        this.progressBar.setIndeterminate(true);
+
+        int RADIUS_DP = 16;
+        int WIDTH_DP = 4;
+
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+        final float screenDensity = metrics.density;
+        CircularProgressDrawable drawable = new CircularProgressDrawable(context);
+        drawable.setColorSchemeColors(Color.WHITE);
+        drawable.setCenterRadius(RADIUS_DP * screenDensity);
+        drawable.setStrokeWidth(WIDTH_DP * screenDensity);
+        this.progressBar.setIndeterminateDrawable(drawable);
+        this.progressBar.setVisibility(VISIBLE);
+    }
+
+    private int getBitrate(){
+        SharedPreferences pref = getContext().getSharedPreferences(TAG, 0);
+        if (pref.contains(BITRATE)) {
+            return pref.getInt(BITRATE,INITIAL_BITRATE);
+        } else {
+            return INITIAL_BITRATE;
+        }
+    }
+
+    private void setBitrate(int bitrate){
+        SharedPreferences pref = getContext().getSharedPreferences(TAG, 0);
+        pref.edit().putInt(BITRATE, bitrate).apply();
+    }
+
     @Override
     protected void onAttachedToWindow() {
         final BrightcovePlayerView that = this;
         super.onAttachedToWindow();
         this.addView(this.playerVideoView);
+        this.addView(this.progressBar);
+
+        RelativeLayout.LayoutParams param = (RelativeLayout.LayoutParams) progressBar.getLayoutParams();
+        param.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        param.addRule(RelativeLayout.CENTER_VERTICAL);
+        this.progressBar.setLayoutParams(param);
+
         this.requestLayout();
 
         EventEmitter eventEmitter = this.playerVideoView.getEventEmitter();
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
-            (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+        exoPlayerVideoDisplayComponent.setBandwidthMeter(defaultBandwidthMeter);
 
         eventEmitter.on(EventType.DID_SET_SOURCE, new EventListener() {
             @Override
@@ -108,6 +162,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.READY_TO_PLAY, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                firstBuffering = true;
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
@@ -171,7 +226,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 WritableMap event = Arguments.createMap();
-                Long playhead = (Long)e.properties.get(Event.PLAYHEAD_POSITION);
+                int playhead = (int) e.properties.get(Event.PLAYHEAD_POSITION);
                 currentTime = playhead / 1000d;
                 event.putDouble("currentTime", currentTime);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
@@ -210,6 +265,7 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 that.sendStatus("bufferingStarted");
+                BrightcovePlayerView.this.progressBar.setVisibility(VISIBLE);
             }
         });
         eventEmitter.on(EventType.BUFFERED_UPDATE, new EventListener() {
@@ -226,11 +282,12 @@ public class BrightcovePlayerView extends RelativeLayout {
             @Override
             public void processEvent(Event e) {
                 com.google.android.exoplayer2.Format format =
-                    (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
+                        (com.google.android.exoplayer2.Format) e.properties.get(ExoPlayerVideoDisplayComponent.EXOPLAYER_FORMAT);
                 WritableMap event = Arguments.createMap();
                 event.putInt("bitrate", format.bitrate);
                 event.putDouble("currentTime", currentTime);
                 Log.d(TAG, "Bitrate : " + format.bitrate + " currentTime : " + currentTime);
+                setBitrate(format.bitrate);
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_BITRATE_UPDATE, event);
             }
@@ -238,7 +295,13 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.BUFFERING_COMPLETED, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                that.sendStatus("bufferingCompleted");
+                if (firstBuffering){
+                    that.sendStatus("firstBufferingCompleted");
+                    firstBuffering = false;
+                } else {
+                    that.sendStatus("bufferingCompleted");
+                }
+                BrightcovePlayerView.this.progressBar.setVisibility(GONE);
             }
         });
         eventEmitter.on(EventType.WILL_INTERRUPT_CONTENT, new EventListener() {
@@ -280,9 +343,12 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.ERROR, new EventListener() {
             @Override
             public void processEvent(Event e) {
+                if ( BrightcovePlayerView.this.progressBar.getVisibility() == View.VISIBLE) {
+                    BrightcovePlayerView.this.progressBar.setVisibility(GONE);
+                }
                 Error error = e.properties.containsKey(Event.ERROR)
-                    ? (Error)e.properties.get(Event.ERROR)
-                    : null;
+                        ? (Error)e.properties.get(Event.ERROR)
+                        : null;
                 that.sendStatus("fail", error == null ? null : error.getLocalizedMessage());
             }
         });
@@ -317,9 +383,9 @@ public class BrightcovePlayerView extends RelativeLayout {
         event.putArray("audioTracks", audioTracks);
         ReactContext context = (ReactContext)getContext();
         context.getJSModule(RCTEventEmitter.class).receiveEvent(
-            getId(),
-            BrightcovePlayerManager.TOP_CHANGE,
-            event);
+                getId(),
+                BrightcovePlayerManager.TOP_CHANGE,
+                event);
     }
 
     @Override
@@ -332,7 +398,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.off();
 
         final ExoPlayerVideoDisplayComponent exoPlayerVideoDisplayComponent =
-            (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
+                (ExoPlayerVideoDisplayComponent) this.playerVideoView.getVideoDisplay();
         playerVideoView.removeListeners();
         if (exoPlayerVideoDisplayComponent.getExoPlayer() != null) {
             exoPlayerVideoDisplayComponent.getExoPlayer().release();
