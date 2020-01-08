@@ -59,7 +59,6 @@ public class BrightcovePlayerView extends RelativeLayout {
     private Catalog catalog;
     private boolean autoPlay = true;
     private boolean playing = false;
-    private boolean firstBuffering = true;
     private DefaultBandwidthMeter defaultBandwidthMeter;
     private ProgressBar progressBar;
 
@@ -162,7 +161,6 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.READY_TO_PLAY, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                firstBuffering = true;
                 WritableMap event = Arguments.createMap();
                 ReactContext reactContext = (ReactContext) BrightcovePlayerView.this.getContext();
                 reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(BrightcovePlayerView.this.getId(), BrightcovePlayerManager.EVENT_READY, event);
@@ -295,12 +293,7 @@ public class BrightcovePlayerView extends RelativeLayout {
         eventEmitter.on(EventType.BUFFERING_COMPLETED, new EventListener() {
             @Override
             public void processEvent(Event e) {
-                if (firstBuffering){
-                    that.sendStatus("firstBufferingCompleted");
-                    firstBuffering = false;
-                } else {
-                    that.sendStatus("bufferingCompleted");
-                }
+                that.sendStatus("bufferingCompleted");
                 BrightcovePlayerView.this.progressBar.setVisibility(GONE);
             }
         });
